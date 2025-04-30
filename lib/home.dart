@@ -1,5 +1,5 @@
-import 'package:demo3/chat.dart';
-import 'package:demo3/model.dart';
+import 'package:talk_shok/chat.dart';
+import 'package:talk_shok/model.dart';
 import 'package:flutter/material.dart';
 
 class myhomepage extends StatefulWidget {
@@ -86,11 +86,14 @@ class _myhomepageState extends State<myhomepage> {
         ],
       ),
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
+        Navigator.of(context).push(
+          MaterialPageRoute(
             builder: (context) => ChatPage(
-                  targetChat: user,
-                  user: widget.sourceChat,
-                )));
+              targetChat: user,
+              user: widget.sourceChat,
+            ),
+          ),
+        );
       },
     );
   }

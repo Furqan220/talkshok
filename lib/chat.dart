@@ -1,26 +1,15 @@
-// import 'package:camera/camera.dart';
-// import 'package:chatapp/CustomUI/CameraUI.dart';
-// import 'package:chatapp/CustomUI/OwnMessgaeCrad.dart';
-// import 'package:chatapp/CustomUI/ReplyCard.dart';
-// import 'package:chatapp/Model/ChatModel.dart';
-// import 'package:chatapp/Model/MessageModel.dart';
-// import 'package:emoji_picker/emoji_picker.dart';
-// import 'dart:html';
-// import 'dart:math';
-
 import 'dart:developer';
-
-import 'package:demo3/home.dart';
-import 'package:demo3/model.dart';
-import 'package:get/get.dart';
-// import 'dart:developer';
+import 'package:talk_shok/model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-// import 'dart:io';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, required this.targetChat, required this.user});
+  const ChatPage({
+    super.key,
+    required this.targetChat,
+    required this.user,
+  });
+
   final ChatModel user;
   final ChatModel targetChat;
 
@@ -30,13 +19,17 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   bool show = false;
+  bool listenerAdded = false;
   FocusNode focusNode = FocusNode();
   bool sendButton = false;
   List<MessageModel> messages = [];
   TextEditingController _controller = TextEditingController();
   ScrollController _scrollController = ScrollController();
   IO.Socket? socket;
-  String status = "";
+
+  // final url = "https://cd91fpcf-3000.inc1.devtunnels.ms";
+  final url = "http://192.168.0.34:5000";
+  ValueNotifier<String> status = ValueNotifier("not connected");
 
   @override
   void initState() {
@@ -54,32 +47,60 @@ class _ChatPageState extends State<ChatPage> {
 
   void connect() {
     socket = IO.io(
-        'http://192.168.1.249:5000',
+        url,
+        // 'http://192.168.0.34:5000',
         IO.OptionBuilder()
+            .setExtraHeaders({'Authorization': widget.user.id.toString()})
             .setTransports(['websocket']) // for Flutter or Dart VM
             .disableAutoConnect() // disable auto-connection
-            // .setExtraHeaders({'foo': 'bar'}) // optional
+            .enableReconnection() // Default: true
+            .setReconnectionDelay(1000) // Wait 1 second between attempts
+            .setReconnectionDelayMax(5000) // Max wait time between attempts
             .build());
+
+    status.value = 'connecting';
     socket!.connect();
-    socket!.emit("signIn", widget.user.id);
+
     print(socket!.connected);
+
     socket!.onConnect((_) {
       print('connect');
-      setState(() {
-        status = 'connected';
-      });
-      socket!.on("message", (data) {
-        log(data.toString());
-        log(data.toString());
+      status.value = 'connected';
+      // socket!.emit("signIn", widget.user.id);
+      if (!listenerAdded) {
+        listenerAdded = true;
+        socket!.on("message", (data) {
+          log(data.toString());
+          log(data.toString());
+          setMessage(data["message"], 'itsNotME');
+        });
+      }
+    });
 
-        setMessage(data["message"], 'itsNotME');
-      });
+    socket?.onDisconnect((_) {
+      print('disconnected');
+      status.value = 'disconnected';
+    });
+
+    socket?.onConnectError((_) {
+      print('connection error');
+      status.value = 'connection error';
+    });
+    socket?.onError((_) {
+      print('error');
+      status.value = 'error';
     });
   }
 
   void sendMessage(String message, int sourceId, int targetId) {
-    socket!.emit("message",
-        {"message": message, "sourceId": sourceId, "targetId": targetId});
+    socket!.emit(
+      "message",
+      {
+        "message": message,
+        "sourceId": sourceId,
+        "targetId": targetId.toString(),
+      },
+    );
     setMessage(message, 'itsME');
   }
 
@@ -87,9 +108,18 @@ class _ChatPageState extends State<ChatPage> {
     String message,
     String type,
   ) {
-    final msg = MessageModel(message: message, type: type);
+    final msg = MessageModel(
+      message: message,
+      type: type,
+    );
     messages.add(msg);
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    socket?.dispose();
+    super.dispose();
   }
 
   @override
@@ -157,13 +187,16 @@ class _ChatPageState extends State<ChatPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        "${status}",
-                        // "last seen today at 12:05",
-                        style: TextStyle(
-                          fontSize: 13,
+                      ValueListenableBuilder(
+                        valueListenable: status,
+                        builder: (_, _status, c) => Text(
+                          _status,
+                          // "last seen today at 12:05",
+                          style: TextStyle(
+                            fontSize: 13,
+                          ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

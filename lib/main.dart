@@ -1,5 +1,4 @@
-import 'package:demo3/home.dart';
-import 'package:demo3/loginpage.dart';
+import 'package:talk_shok/loginpage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -34,7 +33,10 @@ class MyApp extends StatelessWidget {
               page: () => loginpage(),
             ),
             // GetPage(name: '/homepage', page: () => myhomepage()),
-            GetPage(name: '/loginpage2', page: () => loginpage2())
+            GetPage(
+              name: '/loginpage2',
+              page: () => loginpage2(),
+            )
           ],
         ));
       },

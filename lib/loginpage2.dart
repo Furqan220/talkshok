@@ -1,7 +1,6 @@
-import 'package:demo3/home.dart';
-import 'package:demo3/model.dart';
-import 'package:demo3/widget/button.dart';
-import 'package:demo3/widget/textfield.dart';
+import 'package:talk_shok/home.dart';
+import 'package:talk_shok/model.dart';
+import 'package:talk_shok/widget/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -64,19 +63,20 @@ class _loginpage2State extends State<loginpage2> {
               ),
               14.verticalSpace,
               ...List.generate(
-                  chatmodels.length,
-                  (index) => CustomButton(
-                        onPressed: () {
-                          sourceChats = chatmodels.removeAt(index);
-                          Get.off(() => myhomepage(
-                                chatsModels: chatmodels,
-                                sourceChat: sourceChats!,
-                              ));
-                        },
-                        bgcolor: Colors.white,
-                        color: Colors.blue,
-                        title: "${chatmodels[index].name}",
-                      ))
+                chatmodels.length,
+                (index) => CustomButton(
+                  onPressed: () {
+                    sourceChats = chatmodels.removeAt(index);
+                    Get.off(() => myhomepage(
+                          chatsModels: chatmodels,
+                          sourceChat: sourceChats!,
+                        ));
+                  },
+                  bgcolor: Colors.white,
+                  color: Colors.blue,
+                  title: "${chatmodels[index].name}",
+                ),
+              )
               // Textfield1(
               //   title: 'username',
               // ),

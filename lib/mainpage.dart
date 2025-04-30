@@ -1,4 +1,4 @@
-import 'package:demo3/home.dart';
+import 'package:talk_shok/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
